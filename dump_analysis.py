@@ -19,7 +19,6 @@ def main ():
     # *******************
     parser = argparse.ArgumentParser(description='Create an image from a dump file')
     parser.add_argument("dump_file", metavar='dump_name', help='name of the input dump file')
-    parser.add_argument("-p" , "--profile", metavar="profile", help="Profile used in Volatility")
     parser.add_argument("-k" , "--kernel_offset", metavar="kernel_offset", help="Address of the kernel space limit in hexadecimal")
     parser.add_argument("-s", "--size", help='size of the image in pixels heightxwidth (ex: 500x500)')
     parser.add_argument("-o", "--output", metavar='output_name', type=str, help='name of the output image (by default, same as input dump file)')
@@ -52,23 +51,8 @@ def main ():
     if args.format is None:
         args.format = 'png'
 
-    if args.profile is not None:
-        if "Win" in args.profile:
-            #python vol.py -f <image_path> --profile=<profile> kdbgscan
-            cmd = 'python ../volatility/vol.py -f '+args.dump_file+' --profile='+args.profile+' kdbgscan'
-
-            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-            out, err = p.communicate()
-            result = out.split('\n')
-            for lin in result:
-                if "KernelBase" in lin:
-                    lin = lin[lin.index(':')+2:]
-                    lin = lin[:lin.index('(')-1]
-                    args.kernel_offset = lin
-                    break
-    else:
-        if args.kernel_offset is None:
-            sys.exit("I'm not capable to determine the offset of the kernel...\nPlease specify the address of the kernel offset in hexadecimal using the -k parameter.")
+    if args.kernel_offset is None:
+        sys.exit("I'm not capable to determine the offset of the kernel...\nPlease specify the address of the kernel offset in hexadecimal using the -k parameter.")
 
     list_mem = []
 
