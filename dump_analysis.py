@@ -62,7 +62,7 @@ def main ():
     nbr_pages = size_max / 0x1000
 
     while (page < size_max):
-        cmd_xxd = 'xxd -a -s '+str(page)+' -l 0x1000 '+args.dump_file+' -'
+        cmd_xxd = 'xxd -a -s '+str(page)+' -l 0x1000 "'+args.dump_file+'" -'
 
         p = subprocess.Popen(cmd_xxd, stdout=subprocess.PIPE, shell=True)
         out, err = p.communicate()
