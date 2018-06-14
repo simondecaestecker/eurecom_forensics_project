@@ -71,8 +71,8 @@ def main ():
             sys.exit("I'm not capable to determine the offset of the kernel...\nPlease specify the address of the kernel offset in hexadecimal using the -k parameter.")
 
     list_mem = []
-    size_max = 1950*0x1000
-    #size_max = os.path.getsize(args.dump_file)
+
+    size_max = os.path.getsize(args.dump_file)
     size_max_float = float(size_max)
     page = 0
     nbr_pages = size_max / 0x1000
@@ -83,7 +83,7 @@ def main ():
         p = subprocess.Popen(cmd_xxd, stdout=subprocess.PIPE, shell=True)
         out, err = p.communicate()
         result = out.split('\n')
-        #print hex(page) + " --> " + hex(page + 0x1000 - 1) + " :: ",
+
         if page <= int(args.kernel_offset, 16):  # User space
             if (len(result) == 4):  # Page not used
                 list_mem.append("u0")
