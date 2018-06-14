@@ -4,6 +4,8 @@ from PIL import Image, ImageFilter
 import argparse
 import sys
 import os.path
+import subprocess
+from math import ceil
 
 
 def main ():
@@ -17,10 +19,11 @@ def main ():
     # *******************
     parser = argparse.ArgumentParser(description='Create an image from a dump file')
     parser.add_argument("dump_file", metavar='dump_name', help='name of the input dump file')
+    parser.add_argument("-p" , "--profile", metavar="profile", help="Profile used in Volatility")
+    parser.add_argument("-k" , "--kernel_offset", metavar="kernel_offset", help="Address of the kernel space limit in hexadecimal")
     parser.add_argument("-s", "--size", help='size of the image in pixels heightxwidth (ex: 500x500)')
     parser.add_argument("-o", "--output", metavar='output_name', type=str, help='name of the output image (by default, same as input dump file)')
     parser.add_argument("-f", "--format", type=str, choices=['png', 'jpg', 'bmp', 'gif'], help="Output format of the image (png by default)")
-    parser.add_argument("-v", "--verbose", action="store_true", help="increase output verbosity")
     args = parser.parse_args()
 
     #check if provided dump file exists
@@ -49,8 +52,46 @@ def main ():
     if args.format is None:
         args.format = 'png'
 
+    #python vol.py -f <image_path> --profile=<profile> memmap
+    '''cmd = 'python ../volatility/vol.py -f '+args.dump_file+' --profile='+args.profile+' memmap'
+
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+    out, err = p.communicate()
+    result = out.split('\n')
+    for lin in result:
+        i = 0
+        if not lin.startswith('#'):
+            print(lin)'''
+
+    list_mem = []
+    size_max = 1950*0x1000
+    #size_max = os.path.getsize(args.dump_file)
+    size_max_float = float(size_max)
+    page = 0
+    nbr_pages = size_max / 0x1000
+
+    while (page < size_max):
+        cmd_xxd = 'xxd -a -s '+str(page)+' -l 0x1000 '+args.dump_file+' -'
+
+        p = subprocess.Popen(cmd_xxd, stdout=subprocess.PIPE, shell=True)
+        out, err = p.communicate()
+        result = out.split('\n')
+        #print hex(page) + " --> " + hex(page + 0x1000 - 1) + " :: ",
+        if (len(result) == 4):  # Page not used
+            list_mem.append(0)
+        else:                   # Page used
+            if page <= args.kernel_offset:  # User space
+                list_mem.append(1)
+            else:                           # Kernel space
+                list_mem.append(2)
+
+        page += 0x1000
+
+        print(chr(27) + "[2J")
+        print '%.2f' % (page / size_max_float * 100) + " %"
+        print(list_mem)
     #Create image based on data from dump file
-    create_image(args.dump_file, args.output, height, width, args.format)
+    create_image(list_mem, args.output, height, width, args.format)
 
 
     # ************************************
@@ -59,7 +100,9 @@ def main ():
 
 
 # Function to create an image based on the input dumpfile
-def create_image(dumpfile, output_name, height, width, format):
+def create_image(list_mem, output_name, height, width, format):
+    height = int( ceil( len(list_mem) / float(width) ) )
+
     #create a new white image
     img = Image.new('RGB', (width,height), "white")
 
@@ -69,12 +112,24 @@ def create_image(dumpfile, output_name, height, width, format):
     #get the size of the image
     size = img.size
 
+    elmt = 0
     #for every col
     for i in range(size[0]):
         #for every row
-        for j in range(size[1]):
+        for j in reversed(range(size[1])):
             #set the colour accordingly
-            pixels[i,j] = (i, j, 100)
+            if (elmt >= len(list_mem)):
+                pixels[i,j] = (0, 0, 0)
+            else:
+                if (list_mem[elmt] == 0):    # Page not used
+                    pixels[i,j] = (220, 220, 220)
+                elif (list_mem[elmt] == 1):  # User space
+                    pixels[i,j] = (255, 0, 0)
+                elif (list_mem[elmt] == 2):  # Kernel space
+                    pixels[i,j] = (0, 255, 0)
+            elmt += 1
+
+    img.show()
 
     img.save('my_image.'+format)
 
