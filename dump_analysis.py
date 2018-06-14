@@ -84,19 +84,22 @@ def main ():
         out, err = p.communicate()
         result = out.split('\n')
         #print hex(page) + " --> " + hex(page + 0x1000 - 1) + " :: ",
-        if (len(result) == 4):  # Page not used
-            list_mem.append(0)
-        else:                   # Page used
-            if page <= int(args.kernel_offset, 16):  # User space
-                list_mem.append(1)
-            else:                           # Kernel space
-                list_mem.append(2)
+        if page <= int(args.kernel_offset, 16):  # User space
+            if (len(result) == 4):  # Page not used
+                list_mem.append("u0")
+            else:
+                list_mem.append("u1")
+        else:                           # Kernel space
+            if (len(result) == 4):  # Page not used
+                list_mem.append("k0")
+            else:
+                list_mem.append("k1")
 
         page += 0x1000
 
         print(chr(27) + "[2J")
         print '%.2f' % (page / size_max_float * 100) + " %"
-        print(list_mem)
+
     #Create image based on data from dump file
     create_image(list_mem, args.output, height, width, args.format)
 
@@ -128,12 +131,14 @@ def create_image(list_mem, output_name, height, width, format):
             if (elmt >= len(list_mem)):
                 pixels[i,j] = (0, 0, 0)
             else:
-                if (list_mem[elmt] == 0):    # Page not used
-                    pixels[i,j] = (220, 220, 220)
-                elif (list_mem[elmt] == 1):  # User space
-                    pixels[i,j] = (255, 0, 0)
-                elif (list_mem[elmt] == 2):  # Kernel space
-                    pixels[i,j] = (0, 255, 0)
+                if (list_mem[elmt] == "u0"):    # User space page not used
+                    pixels[i,j] = (170, 170, 170)
+                elif (list_mem[elmt] == "u1"):  # User space page used
+                    pixels[i,j] = (0, 0, 150)
+                elif (list_mem[elmt] == "k0"):  # Kernel space page not used
+                    pixels[i,j] = (240, 210, 110)
+                elif (list_mem[elmt] == "k1"):  # Kernel space page used
+                    pixels[i,j] = (200, 150, 0)
             elmt += 1
 
     img.show()
