@@ -52,16 +52,23 @@ def main ():
     if args.format is None:
         args.format = 'png'
 
-    #python vol.py -f <image_path> --profile=<profile> memmap
-    '''cmd = 'python ../volatility/vol.py -f '+args.dump_file+' --profile='+args.profile+' memmap'
+    if args.profile is not None:
+        if "Win" in args.profile:
+            #python vol.py -f <image_path> --profile=<profile> kdbgscan
+            cmd = 'python ../volatility/vol.py -f '+args.dump_file+' --profile='+args.profile+' kdbgscan'
 
-    p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-    out, err = p.communicate()
-    result = out.split('\n')
-    for lin in result:
-        i = 0
-        if not lin.startswith('#'):
-            print(lin)'''
+            p = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
+            out, err = p.communicate()
+            result = out.split('\n')
+            for lin in result:
+                if "KernelBase" in lin:
+                    lin = lin[lin.index(':')+2:]
+                    lin = lin[:lin.index('(')-1]
+                    args.kernel_offset = lin
+                    break
+    else:
+        if args.kernel_offset is None:
+            sys.exit("I'm not capable to determine the offset of the kernel...\nPlease specify the address of the kernel offset in hexadecimal using the -k parameter.")
 
     list_mem = []
     size_max = 1950*0x1000
@@ -132,33 +139,6 @@ def create_image(list_mem, output_name, height, width, format):
     img.show()
 
     img.save('my_image.'+format)
-
-
-# Open dumpfile <name> and store its content in global variables
-# <ct> and <t>.
-def read_dumpfile (name, n):
-    global ct, t
-
-    if not isinstance (n, int) or n < 0:
-        raise ValueError('Invalid maximum number of traces: ' + str(n))
-
-    try:
-        f = open (str(name), 'rb')
-    except IOError:
-        raise ValueError("cannot open file " + name)
-    else:
-        try:
-            ct = []
-            t = []
-            for _ in xrange (n):
-                a, b = f.readline ().split ()
-                ct.append (int(a, 16))
-                t.append (float(b))
-        except (EnvironmentError, ValueError):
-            raise ValueError("cannot read dumpfile")
-        finally:
-            f.close ()
-
 
 if __name__ == "__main__":
     main ()
