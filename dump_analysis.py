@@ -87,7 +87,7 @@ def main ():
         if (len(result) == 4):  # Page not used
             list_mem.append(0)
         else:                   # Page used
-            if page <= args.kernel_offset:  # User space
+            if page <= int(args.kernel_offset, 16):  # User space
                 list_mem.append(1)
             else:                           # Kernel space
                 list_mem.append(2)
@@ -120,10 +120,10 @@ def create_image(list_mem, output_name, height, width, format):
     size = img.size
 
     elmt = 0
-    #for every col
-    for i in range(size[0]):
-        #for every row
-        for j in reversed(range(size[1])):
+    #for every row
+    for j in reversed(range(size[1])):
+        #for every col
+        for i in range(size[0]):
             #set the colour accordingly
             if (elmt >= len(list_mem)):
                 pixels[i,j] = (0, 0, 0)
