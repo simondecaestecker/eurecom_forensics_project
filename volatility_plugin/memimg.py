@@ -8,13 +8,30 @@ import volatility.debug as debug
 import volatility.utils as utils
 import volatility.cache as cache
 import volatility.plugins.taskmods as taskmods
+import volatility.commands as commands
 import time
+import sys
 from PIL import Image, ImageFilter
 from math import ceil
 
 # Inherit from files just for the config options (__init__)
 class MemMapTest(taskmods.DllList):
     """Print the memory map test"""
+    def __init__(self, config, *args, **kwargs):
+        taskmods.DllList.__init__(self, config, *args, **kwargs)
+        config.add_option("width", short_option = 'W',
+                          default = 500, type = 'int',
+                          help = "width of the image in pixels")
+
+        config.add_option("kernel_offset", short_option = 'K',
+                          default = None, help = "Address of the kernel space limit in hexadecimal")
+
+        config.add_option("output_name", short_option = 'O',
+                          default = 'my_image', help = "Name of the image")
+
+        config.add_option("output_format", short_option = 'F', choices=['png', 'jpg', 'bmp', 'gif'],
+                          default = 'png', help = "Output format of the image (png by default)")
+
 
     def unified_output(self, data):
         return TreeGrid([("Process", str),
@@ -23,7 +40,7 @@ class MemMapTest(taskmods.DllList):
                        ("Physical", Address),
                        ("Size", Address),
                        ("DumpFileOffset", Address),
-                       ("Data", str)],
+                       ("Data", String)],
                         self.generator(data))
 
     def generator(self, data):
@@ -48,6 +65,18 @@ class MemMapTest(taskmods.DllList):
 
     def render_text(self, outfd, data):
         empty_mem = 4096*'?'
+
+        image_width = self._config.width
+        kernel_offset = self._config.kernel_offset
+        output_name = self._config.output_name
+        image_format = self._config.output_format
+
+        outfd.write('\nimage_width:'+str(image_width)+'\n')
+        outfd.write('kernel:'+str(kernel_offset)+'\n')
+        outfd.write('output_name:'+str(output_name)+'\n')
+        outfd.write('image_format:'+str(image_format)+'\n\n')
+
+
 
         first = True
 
