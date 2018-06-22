@@ -19,7 +19,7 @@ def main ():
     # *******************
     parser = argparse.ArgumentParser(description='Create an image from a dump file')
     parser.add_argument("dump_file", metavar='dump_name', help='name of the input dump file')
-    parser.add_argument("-k" , "--kernel_offset", metavar="kernel_offset", help="Address of the kernel space limit in hexadecimal")
+    parser.add_argument("-k" , "--kernel_address", metavar="kernel_address", help="Address of the kernel space limit in hexadecimal")
     parser.add_argument("-s", "--size", help='size of the image in pixels heightxwidth (ex: 500x500)')
     parser.add_argument("-o", "--output", metavar='output_name', type=str, help='name of the output image (by default, same as input dump file)')
     parser.add_argument("-f", "--format", type=str, choices=['png', 'jpg', 'bmp', 'gif'], help="Output format of the image (png by default)")
@@ -51,7 +51,7 @@ def main ():
     if args.format is None:
         args.format = 'png'
 
-    if args.kernel_offset is None:
+    if args.kernel_address is None:
         sys.exit("I'm not capable to determine the offset of the kernel...\nPlease specify the address of the kernel offset in hexadecimal using the -k parameter.")
 
     list_mem = []
@@ -68,7 +68,7 @@ def main ():
         out, err = p.communicate()
         result = out.split('\n')
 
-        if page <= int(args.kernel_offset, 16):  # User space
+        if page <= int(args.kernel_address, 16):  # User space
             if (len(result) == 4):  # Page not used
                 list_mem.append("u0")
             else:

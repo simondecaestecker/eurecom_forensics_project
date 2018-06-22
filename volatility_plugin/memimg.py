@@ -24,7 +24,7 @@ class MemMapTest(taskmods.DllList):
                           default = 500, type = 'int',
                           help = "width of the image in pixels")
 
-        config.add_option("kernel_offset", short_option = 'K',
+        config.add_option("kernel_address", short_option = 'K',
                           default = None, help = "Address of the kernel space limit in hexadecimal")
 
         config.add_option("output_name", short_option = 'O',
@@ -33,11 +33,11 @@ class MemMapTest(taskmods.DllList):
         config.add_option("output_format", short_option = 'F', choices=['png', 'jpg', 'bmp', 'gif'],
                           default = 'png', help = "Output format of the image (png by default)")
 
-        if self._config.kernel_offset is None:
+        if self._config.kernel_address is None:
             sys.exit("\nI'm not capable to determine the offset of the kernel...\n\nPlease specify the address of the kernel offset in hexadecimal using the -K parameter.\n")
         else:
             try:
-                int(self._config.kernel_offset,16)
+                int(self._config.kernel_address,16)
             except ValueError:
                 sys.exit("Problem kernel not hexadecimal value")
 
@@ -72,12 +72,12 @@ class MemMapTest(taskmods.DllList):
         empty_mem = 4096*'?'
 
         image_width = self._config.width
-        kernel_offset = self._config.kernel_offset
+        kernel_address = self._config.kernel_address
         output_name = self._config.output_name
         image_format = self._config.output_format
 
         outfd.write('\nimage_width:'+str(image_width)+'\n')
-        outfd.write('kernel:'+str(kernel_offset)+'\n')
+        outfd.write('kernel:'+str(kernel_address)+'\n')
         outfd.write('output_name:'+str(output_name)+'\n')
         outfd.write('image_format:'+str(image_format)+'\n\n')
 
@@ -99,7 +99,7 @@ class MemMapTest(taskmods.DllList):
                         data = task_space.read(p[0], p[1])
 
                         output = False
-                        if p[0] <= kernel_offset:  # User space
+                        if p[0] <= kernel_address:  # User space
                             if empty_mem in data:  # Page not used
                                 output = "u0"
                             else:
