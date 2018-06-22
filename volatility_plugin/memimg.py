@@ -8,6 +8,7 @@ import volatility.debug as debug
 import volatility.utils as utils
 import volatility.cache as cache
 import volatility.plugins.taskmods as taskmods
+import volatility.plugins.kdbgscan as kdbgscan
 import volatility.commands as commands
 import time
 import sys
@@ -29,6 +30,10 @@ class MemMapTest(taskmods.DllList):
 
         config.add_option("output_format", short_option = 'F', choices=['png', 'jpg', 'bmp', 'gif'],
                           default = 'png', help = "Output format of the image (png by default)")
+
+        if self._config.kernel_offset is None:
+            sys.exit("\nI'm not capable to determine the offset of the kernel...\n\nPlease specify the address of the kernel offset in hexadecimal using the -K parameter.\n")
+
 
 
     def unified_output(self, data):
@@ -53,12 +58,7 @@ class MemMapTest(taskmods.DllList):
                     if pa != None:
                         data = task_space.read(p[0], p[1])
                         if data != None:
-                            output = False
-                            if empty_mem in data:
-                                output = '0'
-                            else:
-                                output = '1'
-                            yield (0, [proc, int(pid), Address(p[0]), Address(pa), Address(p[1]), Address(offset), output])
+                            yield (0, [proc, int(pid), Address(p[0]), Address(pa), Address(p[1]), Address(offset), data])
                             offset += p[1]
 
     def render_text(self, outfd, data):
