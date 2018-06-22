@@ -87,13 +87,6 @@ class MemMapTest(taskmods.DllList):
 
             offset = 0
             if pagedata:
-                '''self.table_header(outfd,
-                                  [("Virtual", "[addrpad]"),
-                                   ("Physical", "[addrpad]"),
-                                   ("Size", "[addr]"),
-                                   ("DumpFileOffset", "[addr]"),
-                                   ("Data", "[str]")])'''
-
                 for p in pagedata:
                     pa = task_space.vtop(p[0])
                     # pa can be 0, according to the old memmap, but can't == None(NoneObject)
@@ -106,7 +99,6 @@ class MemMapTest(taskmods.DllList):
                         else:
                             output = "u1"
 
-                        #self.table_row(outfd, p[0], pa, p[1], offset, output)
                         list_pages.add((p[0], output))
                         offset += p[1]
 
@@ -118,8 +110,7 @@ class MemMapTest(taskmods.DllList):
             list_mem = [x[1] for x in list_pages_sorted]
 
             #Create image based on data from dump file
-            #create_image(list_mem, args.output, width, args.format)
-            #create_image(list_mem, "out.jpg", 500, "jpg")
+            create_image(list_mem, output_name, image_width, image_format)
 
 
     @cache.CacheDecorator(lambda self: "tests/memmap/pid={0}/offset={1}".format(self._config.PID, self._config.OFFSET))
@@ -167,4 +158,4 @@ def create_image(list_mem, output_name, width, format):
 
     img.show()
 
-    img.save('my_image.'+format)
+    img.save(output_name + "." +format)
