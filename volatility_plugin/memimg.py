@@ -35,6 +35,11 @@ class MemMapTest(taskmods.DllList):
 
         if self._config.kernel_offset is None:
             sys.exit("\nI'm not capable to determine the offset of the kernel...\n\nPlease specify the address of the kernel offset in hexadecimal using the -K parameter.\n")
+        else:
+            try:
+                int(self._config.kernel_offset,16)
+            except ValueError:
+                sys.exit("Problem kernel not hexadecimal value")
 
 
 
@@ -94,7 +99,7 @@ class MemMapTest(taskmods.DllList):
                         data = task_space.read(p[0], p[1])
 
                         output = False
-                        if p[0] <= int(kernel_offset, 16):  # User space
+                        if p[0] <= kernel_offset:  # User space
                             if empty_mem in data:  # Page not used
                                 output = "u0"
                             else:
