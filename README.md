@@ -38,7 +38,7 @@ Volatility provides numerous samples of memory dumps [here](https://github.com/v
 Clone the project repository on your pc:
 
 ```
-git clone https://...
+git clone https://github.com/simondecaestecker/eurecom_forensics_project.git
 ```
 
 or just download the Python file on your PC.
