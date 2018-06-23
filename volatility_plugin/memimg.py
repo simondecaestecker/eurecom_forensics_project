@@ -99,7 +99,7 @@ class MemMapTest(taskmods.DllList):
                         data = task_space.read(p[0], p[1])
 
                         output = False
-                        if p[0] <= kernel_address:  # User space
+                        if p[0] <= int(kernel_address, 16):  # User space
                             if empty_mem in data:  # Page not used
                                 output = "u0"
                             else:
