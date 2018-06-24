@@ -25,7 +25,7 @@ class memimg(taskmods.DllList):
                           help = "width of the image in pixels")
 
         config.add_option("kernel_address", short_option = 'K',
-                          default = None, help = "Address of the kernel space limit in hexadecimal")
+                          default = None, help = "Virtual address of the kernel space base in hexadecimal")
 
         config.add_option("output_name", short_option = 'O',
                           default = 'my_image', help = "Name of the image")
