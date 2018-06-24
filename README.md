@@ -1,4 +1,4 @@
-# DumPNG (Forensics project)
+# MemImg (Forensics project)
 
 Write a tool to visualize the content of a memory dump as a PNG picture. Each pixel represents one page of physical memory, and its color represent if it is associated to the kernel, to a userspace application, or if it is not used. In this last case, maybe two different shades could be used to differentiate pages that contain only zeros from pages that contain data.
 
@@ -50,6 +50,8 @@ The memmap command shows you exactly which pages are memory resident. It shows y
 
 To this information, we add a new information that checks if the current page contains data or not thanks to the **read** function.
 
+Basically, if the memmap plugin does not work on a particular dump file, our plugin will also not work for this dump file.
+
 
 ## Using the tool
 
@@ -64,7 +66,7 @@ some_path/volatility/volatility/plugins/
 You are now able to launch the plugin. In this purpose, issue the following command in your Terminal:
 
 ```
-python vol.py -f <path_to_dump_file> --profile=<profile> memmaptest <options>
+python vol.py -f <path_to_dump_file> --profile=<profile> memimg <options>
 
 ```
 
@@ -76,13 +78,13 @@ You can pass different parameters to the plugin:
 |--|--|
 | -K, --kernel | Virtual address of the kernel space limit in hexadecimal |
 | -W, --width  | width of the image in pixels  |
-| -O, --output_name  | Name of the output image  |
-| -F, --output_format   | Output format of the image (png by default)  |
+| -O, --output_name  | Name of the output image (without the extension)  |
+| -F, --output_format   | Output format of the image (png by default). You have the choice between png, jpg, bmp and gif.  |
 
 
 For example, you can issue the following command:
 ```
-python vol.py -f <path_to_dump_file> --profile=<profile> memmaptest -W 1000 -F jpg -O picture_dump -K 0x804d7000
+python vol.py -f <path_to_dump_file> --profile=<profile> memimg -W 1000 -F jpg -O picture_dump -K 0x804d7000
 ```
 
 ### If you don't know the profile
@@ -91,20 +93,11 @@ If you are not sure of the profile you should use for your dump file, you can ru
 **Caution!** It only works for Windows dumps. There is currently no way to determine what is the right profile for Linux dumps. You can find [here](https://github.com/volatilityfoundation/volatility) the list of profiles and supported OS.
 
 ## Challenges encountered
-The standard partitioning of a memory is the following:
+The standard partitioning of a memory depends on the OS and the size of the memory. Moreover, it can be customized by users.
 
-IMAGE
+Thus, we must find a way to retrieve at what offset the kernel space starts. Volatility provides this functionality through its **kdbgscan** plugin. By running it on your dump file, it gives you (among other useful information) the virtual address of the kernel base.
 
-
-However, it is entirely possible that people customizes this partitioning. Thus, we must find a way to retrieve at what offset the kernel space starts.
-
-In the aim to do that, we wanted to use Volatility. Indeed, it indicates its ability to retrieve the kernel base. This option is provided in the *kdbgscan* plugin.
-
-However, results show inconsistencies that we could not resolve. Indeed, for an approximatively 530 MB memory dump, it indicates that the kernel base is at **0x804d7000** (hence, XX GB):
-
-IMAGE
-
-Therefore, the workaround we adopted is to force the user to indicate the kernel offset in parameter of the tool. More work is to be done on this matter.
+However, we were not able to directly retrieve this information directly in our plugin. Thus, you must enter the kernel base virtual address using the -K option in order for our plugin to work properly.
 
 
 ## Authors
