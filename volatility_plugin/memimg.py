@@ -76,10 +76,9 @@ class MemMapTest(taskmods.DllList):
         output_name = self._config.output_name
         image_format = self._config.output_format
 
-        outfd.write('\nimage_width:'+str(image_width)+'\n')
-        outfd.write('kernel:'+str(kernel_address)+'\n')
-        outfd.write('output_name:'+str(output_name)+'\n')
-        outfd.write('image_format:'+str(image_format)+'\n\n')
+        outfd.write('\nOutput image filename: ' + output_name + "." + image_format + '\n')
+        outfd.write('Output image width: ' + str(image_width) + 'px\n')
+        outfd.write('Address of the kernel space limit: ' + str(kernel_address)+ '\n')
 
 
 
@@ -99,7 +98,7 @@ class MemMapTest(taskmods.DllList):
                         data = task_space.read(p[0], p[1])
 
                         output = False
-                        if p[0] <= kernel_address:  # User space
+                        if p[0] <= int(kernel_address, 16):  # User space
                             if empty_mem in data:  # Page not used
                                 output = "u0"
                             else:
