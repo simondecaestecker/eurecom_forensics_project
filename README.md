@@ -92,6 +92,9 @@ If you are not sure of the profile you should use for your dump file, you can ru
 
 **Caution!** It only works for Windows dumps. There is currently no way to determine what is the right profile for Linux dumps. You can find [here](https://github.com/volatilityfoundation/volatility) the list of profiles and supported OS.
 
+### Output image
+At the end, an image file will be created regarding the parameters used. Each pixel represents a page of memory. Two colors with two shades each are used: blue and yellow. Blue is used to represent user space pages and yellow is used for kernel space pages. The dark shade represents a page containing data and the clear shade an empty page.
+
 ## Challenges encountered
 The standard partitioning of a memory depends on the OS and the size of the memory. Moreover, it can be customized by users.
 
