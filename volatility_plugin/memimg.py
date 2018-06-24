@@ -16,8 +16,8 @@ from PIL import Image, ImageFilter
 from math import ceil
 
 # Inherit from files just for the config options (__init__)
-class MemMapTest(taskmods.DllList):
-    """Print the memory map test"""
+class memimg(taskmods.DllList):
+    """Create an image of the memory dump"""
     def __init__(self, config, *args, **kwargs):
         taskmods.DllList.__init__(self, config, *args, **kwargs)
         config.add_option("width", short_option = 'W',
