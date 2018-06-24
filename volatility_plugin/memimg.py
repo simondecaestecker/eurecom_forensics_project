@@ -166,6 +166,4 @@ def create_image(list_mem, output_name, width, format):
                     pixels[i,j] = (200, 150, 0)
             elmt += 1
 
-    img.show()
-
     img.save(output_name + "." +format)
